@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./aboard.db"
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
+  name     String
+  posts    Post[]
+  comments Comment[]
+}
+
+model Post {
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  postedOn     DateTime  @default(now())
+  community    String
+  commentCount Int       @default(0)
+  title        String
+  body         String
+  user         User      @relation(fields: [userId], references: [id])
+  comments     Comment[]
+
+  @@index(fields: [userId, community, postedOn])
+}
+
+model Comment {
+  postId    Int
+  userId    Int
+  timestamp Int
+  body      String
+  post      Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User   @relation(fields: [userId], references: [id])
+
+  @@id([postId, userId, timestamp])
+}
