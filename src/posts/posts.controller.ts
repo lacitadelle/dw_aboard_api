@@ -9,6 +9,8 @@ import {
   ValidationPipe,
   UseGuards,
   Request,
+  Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -32,8 +34,14 @@ export class PostsController {
   }
 
   @Get()
-  findAll() {
-    return this.postsService.findAll();
+  findAll(
+    @Query('community') community?: Community,
+    @Query('keywords') keywords?: string,
+  ) {
+    if (community && !Object.values(Community).includes(community)) {
+      throw new BadRequestException('Invalid community provided');
+    }
+    return this.postsService.findAll(community, keywords);
   }
 
   @Get(':id')
@@ -41,6 +49,7 @@ export class PostsController {
     return this.postsService.findOne(+id);
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
     return this.postsService.update(+id, updatePostDto);
