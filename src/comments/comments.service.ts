@@ -31,6 +31,13 @@ export class CommentsService {
         where: {
           postId,
         },
+        include: {
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
       });
     } catch {
       throw new InternalServerErrorException('Unable to fetch comments');

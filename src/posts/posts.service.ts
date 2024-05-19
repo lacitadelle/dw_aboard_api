@@ -58,6 +58,36 @@ export class PostsService {
     return posts;
   }
 
+  async findOwn(userId: number, community?: string, keywords?: string) {
+    // Prepare statement for the while clause. Empty objects are ignored by Prisma.
+    const whereClause = {
+      AND: [
+        { userId },
+        community ? { community } : {},
+        keywords ? { title: { contains: keywords } } : {},
+      ],
+    };
+    let posts = [];
+    try {
+      posts = await this.databaseService.post.findMany({
+        where: whereClause,
+        include: {
+          user: {
+            select: {
+              name: true, // the post author's name
+            },
+          },
+        },
+      });
+    } catch (e) {
+      throw new InternalServerErrorException('Unable to retrieve posts');
+    }
+
+    if (posts.length === 0)
+      throw new HttpException('No matching results', HttpStatus.NOT_FOUND);
+    return posts;
+  }
+
   async findOne(id: number) {
     let post = {};
     try {

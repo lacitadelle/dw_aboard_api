@@ -44,6 +44,19 @@ export class PostsController {
     return this.postsService.findAll(community, keywords);
   }
 
+  @UseGuards(AuthGuard)
+  @Get('user')
+  findOwn(
+    @Request() req,
+    @Query('community') community?: Community,
+    @Query('keywords') keywords?: string,
+  ) {
+    if (community && !Object.values(Community).includes(community)) {
+      throw new BadRequestException('Invalid community provided');
+    }
+    return this.postsService.findOwn(req.user.id, community, keywords);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.postsService.findOne(+id);
