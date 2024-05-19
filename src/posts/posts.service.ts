@@ -34,14 +34,7 @@ export class PostsService {
     const whereClause = {
       AND: [
         community ? { community } : {},
-        keywords
-          ? {
-              OR: [
-                { title: { contains: keywords } },
-                { body: { contains: keywords } },
-              ],
-            }
-          : {},
+        keywords ? { title: { contains: keywords } } : {},
       ],
     };
     let posts = [];
