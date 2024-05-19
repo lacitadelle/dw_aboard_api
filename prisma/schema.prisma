@@ -38,10 +38,10 @@ model Post {
 model Comment {
   postId    Int
   userId    Int
-  timestamp Int
+  timestamp DateTime @default(now())
   body      String
-  post      Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user      User   @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
 
   @@id([postId, userId, timestamp])
 }
