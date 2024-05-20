@@ -15,7 +15,7 @@ export class CommentsService {
     try {
       return await this.databaseService.comment.create({
         data: {
-          userId: user.sub,
+          userId: user.id,
           postId,
           ...createCommentDto,
         },
@@ -30,6 +30,9 @@ export class CommentsService {
       return await this.databaseService.comment.findMany({
         where: {
           postId,
+        },
+        orderBy: {
+          timestamp: 'desc',
         },
         include: {
           user: {

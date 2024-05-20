@@ -16,15 +16,16 @@ export class PostsService {
   async create(
     createPostDto: CreatePostDto,
     user: {
-      sub: number;
+      id: number;
       email: string;
     },
   ) {
     try {
       return await this.databaseService.post.create({
-        data: { userId: user.sub, ...createPostDto },
+        data: { userId: user.id, ...createPostDto },
       });
     } catch (e) {
+      console.log(e);
       throw new InternalServerErrorException('Unable to post');
     }
   }
@@ -41,6 +42,9 @@ export class PostsService {
     try {
       posts = await this.databaseService.post.findMany({
         where: whereClause,
+        orderBy: {
+          postedOn: 'desc',
+        },
         include: {
           user: {
             select: {
@@ -71,6 +75,9 @@ export class PostsService {
     try {
       posts = await this.databaseService.post.findMany({
         where: whereClause,
+        orderBy: {
+          postedOn: 'desc',
+        },
         include: {
           user: {
             select: {
@@ -120,7 +127,7 @@ export class PostsService {
   async update(
     id: number,
     updatePostDto: UpdatePostDto,
-    user: { sub: string; email: string },
+    user: { id: string; email: string },
   ) {
     // check if the post we want to update exist
     let post: Post;
@@ -136,12 +143,12 @@ export class PostsService {
 
     if (!post)
       throw new HttpException(
-        'Post with id #${id} not found',
+        `Post with id #${id} not found`,
         HttpStatus.NOT_FOUND,
       );
 
     // check if the user who made the request is the post's owner
-    if (post.userId !== +user.sub) {
+    if (post.userId !== +user.id) {
       throw new HttpException(
         'You can only edit your own post',
         HttpStatus.UNAUTHORIZED,
@@ -161,7 +168,7 @@ export class PostsService {
     }
   }
 
-  async remove(id: number, user: { sub: string; email: string }) {
+  async remove(id: number, user: { id: string; email: string }) {
     // check if the post we want to delete exist
     let post: Post;
     try {
@@ -176,12 +183,12 @@ export class PostsService {
 
     if (!post)
       throw new HttpException(
-        'Post with id #${id} not found',
+        `Post with id #${id} not found`,
         HttpStatus.NOT_FOUND,
       );
 
     // check if the user who made the request is the post's owner
-    if (post.userId !== +user.sub) {
+    if (post.userId !== +user.id) {
       throw new HttpException(
         'You can only delete your own post',
         HttpStatus.UNAUTHORIZED,
